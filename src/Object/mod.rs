@@ -17,6 +17,8 @@ pub mod object {
         pub vel: V,
         pub acc: V,
         pub kind: kind,
+        pub GPE: T,
+        
         
 
 
@@ -41,7 +43,10 @@ pub mod object {
                 pos: V::clone(&self.pos),
                 vel: V::clone(&self.vel),
                 acc: V::clone(&self.acc),
-                kind: self.kind
+                kind: self.kind,
+                GPE: self.GPE,
+                
+                
             }
         }
 
@@ -52,8 +57,8 @@ pub mod object {
         T: Real,
         V: IsVec3d<Component = T>
     {
-        pub fn new(mass: T, pos: V, vel: V,acc: V,kind: kind) -> Self{
-            return Ob { mass: mass, pos: pos, vel: vel,acc: acc, kind: kind};
+        pub fn new(mass: T, pos: V, vel: V,acc: V,kind: kind,GPE: T) -> Self{
+            return Ob { mass: mass, pos: pos, vel: vel,acc: acc, kind: kind, GPE:GPE};
         }
     }
 }

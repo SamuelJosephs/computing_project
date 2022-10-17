@@ -2,17 +2,17 @@ mod vec3;
 use Object::object::{Ob, kind};
 use integrator::integrator::{euler_step,euler_step2};
 use vec3::vec3d::IsVec3d;
-use vec3::vec3d::{self, Vec3d};
+use vec3::vec3d::{Vec3d};
 mod Object;
 mod integrator;
 use std::fs::{File};
-use std::io::{self, Write};
+use std::io::{Write};
 
 fn initialise_mat_with_capacity<T:Default>(n:usize) -> Vec<Vec<T>>{
     let mut initial_vec = Vec::<Vec<T>>::with_capacity(n);
-    for i in 0..n {
+    for _ in 0..n {
         let mut temp_vec = Vec::<T>::with_capacity(n);
-        for i in 0..n {
+        for _ in 0..n {
             temp_vec.push(T::default());
         }
         
@@ -51,7 +51,7 @@ where
                                     + &vx + &comma 
                                     + &vy + &comma 
                                     + &vz + &comma).as_str();
-                                    ;
+                                    
         
         // file.write_all(string_to_write.as_bytes()).expect("Unable to write to file, are you running with correct permissions");
       }
@@ -61,13 +61,15 @@ where
 }
 
 fn main(){
-    let planet = Ob::<f64,Vec3d<f64>>::new(1.,Vec3d{x:1.,y:1.,z:1.},Vec3d{x:1.,y:1.,z:1.},Vec3d{x:0.,y:0.,z:0.},kind::Planet);
+    let planet = Ob::<f64,Vec3d<f64>>::new(1.,Vec3d{x:100.,y:100.,z:100.},Vec3d{x:1.,y:1.,z:1.},Vec3d{x:0.,y:0.,z:0.},kind::Planet,0.);
     let star = Ob::<f64,Vec3d<f64>>::new(
         1000.,
         Vec3d{x:0.,y:0.,z:0.},
         Vec3d{x:0., y:0., z:0.},
         Vec3d{x:0.,y:0.,z:0.},
-        kind::Star
+        kind::Star,
+        0.,
+    
     );
     let mut inputs = vec![planet,star];
 
@@ -80,9 +82,12 @@ fn main(){
 
     let mut file = File::create("Results.csv").expect("Unable to create file, are you certain you are running with correct permissions?\n");
     let mut data_string = String::with_capacity(10000000);
-    for i in 0..((T as f64/dt) as usize) {
-        inputs = euler_step2(inputs, dt, epsilon, &mut a_matrix, g);
+    let mut total_E = 0.;
+    for _ in 0..((T as f64/dt) as usize) {
+        (inputs,total_E) = euler_step2(inputs, dt, epsilon, &mut a_matrix, g);
+        data_string += total_E.to_string().as_str(); data_string += ",";
         data_string += format_inputs_to_string(&inputs).as_str();
+        
     }
 
     // Writing results to file

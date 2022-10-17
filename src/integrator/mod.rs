@@ -49,13 +49,16 @@ pub mod integrator {
     }
 
 
-    pub fn euler_step2<T,V>(mut input:  Vec<Ob<T,V>>, dt: T, epsilon: T, a_matrix: &mut Vec<Vec<V>>,g: T) -> (Vec<Ob<T,V>>)
+    pub fn euler_step2<T,V>(mut input:  Vec<Ob<T,V>>, dt: T, epsilon: T, a_matrix: &mut Vec<Vec<V>>,g: T) -> (Vec<Ob<T,V>>,T)
     where 
         T: real::Real,
         V: IsVec3d<Component = T> + Default
     {
+        let mut total_GPE  = T::from(0).unwrap();
+        let mut total_KE = T::from(0).unwrap();
         // Step through and calculate accelerations, then step through and update velocities then positions
         for i in 0..input.len(){
+            input[i].GPE = T::from(0.).unwrap();
             let mut acceleration = V::default();
             for j in 0..input.len(){
                 if i == j {continue};
@@ -64,7 +67,9 @@ pub mod integrator {
                     &input[i].pos
                 );
                 let denominator = (r.mag_squared() + epsilon*epsilon).powi(3).sqrt();
+                let denominator_potential = r.mag_squared().powi(-1);
                 acceleration = acceleration.add(&r.scalardiv(denominator).scalarmul(g).scalarmul(input[j].mass));
+                input[i].GPE = input[i].GPE + denominator_potential * g * input[i].mass * input[j].mass;
             }
             input[i].acc = acceleration;
             
@@ -74,8 +79,11 @@ pub mod integrator {
         for i in 0..input.len(){
             input[i].vel = input[i].vel.add(&input[i].acc.scalarmul(dt));
             input[i].pos = input[i].pos.add(&input[i].vel.scalarmul(dt));
+            
+            total_GPE = total_GPE + input[i].GPE;
+            total_KE = total_KE + T::from(0.5).unwrap() * input[i].mass * input[i].vel.mag_squared();
         }
-        return input;
+        return (input,total_GPE + total_KE);
     }
 
 
