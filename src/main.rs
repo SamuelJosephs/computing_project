@@ -36,9 +36,7 @@ where
         let y = i.pos.y().to_string();
         let z = i.pos.z().to_string();
 
-        let vx = i.vel.x().to_string();
-        let vy = i.vel.y().to_string();
-        let vz = i.vel.z().to_string();
+
 
         // file.write_all(mass.as_bytes());
         // file.write_all(comma.as_bytes());
@@ -48,9 +46,7 @@ where
                                     + &x + &comma
                                     + &y + &comma
                                     + &z + &comma 
-                                    + &vx + &comma 
-                                    + &vy + &comma 
-                                    + &vz + &comma).as_str();
+                                    ).as_str();
                                     
         
         // file.write_all(string_to_write.as_bytes()).expect("Unable to write to file, are you running with correct permissions");
@@ -72,30 +68,47 @@ fn main(){
     
     );
     let mut inputs = vec![planet,star];
+    
 
     let T:i32 = 1000;
     let dt = 0.001;
-    let epsilon = 0.0001;
+    let epsilon = 0.00000001;
     let mut a_matrix = initialise_mat_with_capacity(inputs.len());
 
     let g = 6.67e-11;
 
     let mut file = File::create("Results.csv").expect("Unable to create file, are you certain you are running with correct permissions?\n");
+    
+
     let mut data_string = String::with_capacity(10000000);
+    
     let mut total_E = 0.;
+    
+    let n_iter = 10;
+    let mut nth_iter = 0;
     for _ in 0..((T as f64/dt) as usize) {
-        (inputs,total_E) = euler_step2(inputs, dt, epsilon, &mut a_matrix, g);
-        data_string += total_E.to_string().as_str(); data_string += ",";
-        data_string += format_inputs_to_string(&inputs).as_str();
+        
+        (inputs, total_E) = euler_step2(inputs, dt, epsilon, &mut a_matrix, g);
+        
+        
+        if nth_iter < n_iter {
+            
+            nth_iter += 1;
+            continue;
+        }
+        else {
+            data_string += total_E.to_string().as_str(); data_string += ",";
+            data_string += format_inputs_to_string(&inputs).as_str();
+            nth_iter = 0;
+        }
+        
+        
         
     }
 
-    // Writing results to file
-    // Write out the columns
-    // for i in inputs.iter() {
+  
 
-    // }
-
-    file.write_all(data_string.as_bytes());
+    file.write_all(data_string.as_bytes()).expect("Failed to write to file, are you sure you are using running with appropriate permissions?");
+    
     
 }
