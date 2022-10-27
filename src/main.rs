@@ -1,6 +1,7 @@
 mod vec3;
 use Object::object::{Ob, kind};
 use integrator::integrator::{euler_step,euler_step2};
+use num_traits::Float;
 use vec3::vec3d::IsVec3d;
 use vec3::vec3d::{Vec3d};
 mod Object;
@@ -57,9 +58,9 @@ where
 }
 
 fn main(){
-    let planet = Ob::<f64,Vec3d<f64>>::new(1.,Vec3d{x:100.,y:100.,z:100.},Vec3d{x:1.,y:1.,z:1.},Vec3d{x:0.,y:0.,z:0.},kind::Planet,0.);
+    let planet = Ob::<f64,Vec3d<f64>>::new(5.972e24,Vec3d{x:14868e4,y:0.,z:0.},Vec3d{x:0.,y:(6.67e-11*1.989e30 / 14868e4).sqrt(),z:0.},Vec3d{x:0.,y:0.,z:0.},kind::Planet,0.);
     let star = Ob::<f64,Vec3d<f64>>::new(
-        1000.,
+        1.989e30,
         Vec3d{x:0.,y:0.,z:0.},
         Vec3d{x:0., y:0., z:0.},
         Vec3d{x:0.,y:0.,z:0.},
@@ -107,7 +108,7 @@ fn main(){
     }
 
   
-
+    
     file.write_all(data_string.as_bytes()).expect("Failed to write to file, are you sure you are using running with appropriate permissions?");
     
     
