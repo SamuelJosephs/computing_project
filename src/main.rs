@@ -1,11 +1,14 @@
 mod vec3;
 use Object::object::{Ob, kind};
-use integrator::integrator::{euler_step,euler_step2};
+use integrator::integrator::{euler_step,euler_step2, step_back_v};
 use num_traits::Float;
+use num_traits::real::Real;
 use vec3::vec3d::IsVec3d;
 use vec3::vec3d::{Vec3d};
 mod Object;
 mod integrator;
+
+use std::f64::consts::PI;
 use std::fs::{File};
 use std::io::{Write};
 
@@ -58,7 +61,7 @@ where
 }
 
 fn main(){
-    let planet = Ob::<f64,Vec3d<f64>>::new(5.972e24,Vec3d{x:14868e4,y:0.,z:0.},Vec3d{x:0.,y:(6.67e-11*1.989e30 / 14868e4).sqrt(),z:0.},Vec3d{x:0.,y:0.,z:0.},kind::Planet,0.);
+    let planet = Ob::<f64,Vec3d<f64>>::new(5.972e24,Vec3d{x:14868e4,y:0.,z:0.},Vec3d{x:0.,y:(((6.67e-11*1.989e30 / 14868e4) as f64).sqrt()),z:0.},Vec3d{x:0.,y:0.,z:0.},kind::Planet,0.);
     let star = Ob::<f64,Vec3d<f64>>::new(
         1.989e30,
         Vec3d{x:0.,y:0.,z:0.},
@@ -71,9 +74,16 @@ fn main(){
     let mut inputs = vec![planet,star];
     
 
-    let T:i32 = 1000;
-    let dt = 0.001;
-    let epsilon = 0.00000001;
+    
+
+    
+    let N_orbits = 100.;
+    // Work out T 
+    let mut temp_denominator = ((6.67e-11*1.989e30 / 14868e4) as f64);
+    let T: f64 = N_orbits*(2.*PI*14868e4)/((temp_denominator.sqrt()));
+    // Work out dt
+    let dt: f64 = (10. / 365.25) * T;
+    const epsilon: f64 = 0.0000001;
     let mut a_matrix = initialise_mat_with_capacity(inputs.len());
 
     let g = 6.67e-11;
@@ -85,9 +95,10 @@ fn main(){
     
     let mut total_E = 0.;
     
-    let n_iter = 10;
+    let n_iter = 100;
     let mut nth_iter = 0;
-    for _ in 0..((T as f64/dt) as usize) {
+    inputs = step_back_v(inputs, dt, epsilon, &mut a_matrix, g); // Step back initial v by half a time step
+    for _ in 0..((T/dt) as i64) {
         
         (inputs, total_E) = euler_step2(inputs, dt, epsilon, &mut a_matrix, g);
         
