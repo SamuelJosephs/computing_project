@@ -60,10 +60,29 @@ where
     return string_to_return;
 }
 
+
+// constants
+const EARTH_M: f64 = 5.972e24;
+const EARTH_R: f64 = 1.4959787e11;
+
+const SUN_M: f64 = 1.989e30;
+
+const JUPITER_M: f64 = 1.898e27;
+const JUPITER_R: f64 = 	778340821e3;
+
+const G:f64 = 6.67e-11;
 fn main(){
-    let planet = Ob::<f64,Vec3d<f64>>::new(5.972e24,Vec3d{x:14868e4,y:0.,z:0.},Vec3d{x:0.,y:(((6.67e-11*1.989e30 / 14868e4) as f64).sqrt()),z:0.},Vec3d{x:0.,y:0.,z:0.},kind::Planet,0.);
+    let planet = Ob::<f64,Vec3d<f64>>::new(EARTH_M,Vec3d{x:EARTH_R,y:0.,z:0.},Vec3d{x:0.,y:(((G*SUN_M / EARTH_R) as f64).sqrt()),z:0.},Vec3d{x:0.,y:0.,z:0.},kind::Planet,0.);
+    let jupiter = Ob::<f64,Vec3d<f64>>::new(
+        JUPITER_M,
+        Vec3d {x:-JUPITER_R, y:0.,z: 0.},
+        Vec3d {x: 0., y: ((G * SUN_M) / JUPITER_R), z: 0. },
+        Vec3d { x: 0., y: 0., z: 0. },
+        kind::Planet,
+        0.
+    );
     let star = Ob::<f64,Vec3d<f64>>::new(
-        1.989e30,
+        SUN_M,
         Vec3d{x:0.,y:0.,z:0.},
         Vec3d{x:0., y:0., z:0.},
         Vec3d{x:0.,y:0.,z:0.},
@@ -71,7 +90,7 @@ fn main(){
         0.,
     
     );
-    let mut inputs = vec![planet,star];
+    let mut inputs = vec![planet,star,jupiter];
     
 
     
@@ -79,8 +98,8 @@ fn main(){
     
     let N_orbits = 100.;
     // Work out T 
-    let mut temp_denominator = ((6.67e-11*1.989e30 / 14868e4) as f64);
-    let T: f64 = N_orbits*(2.*PI*14868e4)/((temp_denominator.sqrt()));
+    let mut temp_denominator = ((G*SUN_M / EARTH_R) as f64);
+    let T: f64 = N_orbits*(2.*PI*EARTH_R)/((temp_denominator.sqrt()));
     // Work out dt
     let dt: f64 = (10. / (N_orbits*365.25)) * T;
     const epsilon: f64 = 0.0000001;
