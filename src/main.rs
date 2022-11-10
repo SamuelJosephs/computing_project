@@ -82,7 +82,7 @@ fn main(){
     let mut temp_denominator = ((6.67e-11*1.989e30 / 14868e4) as f64);
     let T: f64 = N_orbits*(2.*PI*14868e4)/((temp_denominator.sqrt()));
     // Work out dt
-    let dt: f64 = (10. / 365.25) * T;
+    let dt: f64 = (10. / (N_orbits*365.25)) * T;
     const epsilon: f64 = 0.0000001;
     let mut a_matrix = initialise_mat_with_capacity(inputs.len());
 
@@ -95,10 +95,12 @@ fn main(){
     
     let mut total_E = 0.;
     
-    let n_iter = 100;
+    let n_iter = 0;
     let mut nth_iter = 0;
-    inputs = step_back_v(inputs, dt, epsilon, &mut a_matrix, g); // Step back initial v by half a time step
-    for _ in 0..((T/dt) as i64) {
+    (inputs,total_E) = step_back_v(inputs, dt, epsilon, &mut a_matrix, g); // Step back initial v by half a time step
+    // data_string += total_E.to_string().as_str(); data_string += ",";
+    // data_string += format_inputs_to_string(&inputs).as_str();
+    for _ in 0..((T/dt) as i64 ) {
         
         (inputs, total_E) = euler_step2(inputs, dt, epsilon, &mut a_matrix, g);
         
