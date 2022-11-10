@@ -49,7 +49,7 @@ pub mod integrator {
     }
 
 
-    pub fn euler_step2<T,V>(mut input:  Vec<Ob<T,V>>, dt: T, epsilon: T, a_matrix: &mut Vec<Vec<V>>,g: T) -> (Vec<Ob<T,V>>,T)
+    pub fn euler_step2<T,V>(mut input:  Vec<Ob<T,V>>, dt: T, epsilon: T, a_matrix: &mut Vec<Vec<V>>,g: T) -> (Vec<Ob<T,V>>,T,T)
     where 
         T: real::Real,
         V: IsVec3d<Component = T> + Default
@@ -67,9 +67,9 @@ pub mod integrator {
                     &input[i].pos
                 );
                 let denominator = (r.mag_squared() + epsilon*epsilon).powi(3).sqrt();
-                let denominator_potential = r.mag_squared().powi(-1).sqrt();
+                let denominator_potential = r.mag_squared().sqrt().recip();
                 acceleration = acceleration.add(&r.scalardiv(denominator).scalarmul(g).scalarmul(input[j].mass));
-                input[i].GPE = input[i].GPE + denominator_potential * g * input[i].mass * input[j].mass;
+                input[i].GPE = input[i].GPE + (denominator_potential * g * input[i].mass * input[j].mass).neg();
             }
             input[i].acc = acceleration;
             
@@ -89,10 +89,10 @@ pub mod integrator {
             total_GPE = total_GPE + input[i].GPE;
             total_KE = total_KE + T::from(0.5).unwrap() * input[i].mass * temp_v.mag_squared();
         }
-        return (input,total_GPE + total_KE);
+        return (input,total_GPE,total_KE);
     }
 
-    pub fn step_back_v<T,V>(mut input:  Vec<Ob<T,V>>, dt: T, epsilon: T, a_matrix: &mut Vec<Vec<V>>,g: T) -> (Vec<Ob<T,V>>,T)
+    pub fn step_back_v<T,V>(mut input:  Vec<Ob<T,V>>, dt: T, epsilon: T, a_matrix: &mut Vec<Vec<V>>,g: T) -> (Vec<Ob<T,V>>,T,T)
     where 
         T: real::Real,
         V: IsVec3d<Component = T> + Default
@@ -111,9 +111,9 @@ pub mod integrator {
                     &input[i].pos
                 );
                 let denominator = (r.mag_squared() + epsilon*epsilon).powi(3).sqrt();
-                let denominator_potential = r.mag_squared().powi(-1).sqrt();
+                let denominator_potential = r.mag_squared().sqrt().recip();
                 acceleration = acceleration.add(&r.scalardiv(denominator).scalarmul(g).scalarmul(input[j].mass));
-                input[i].GPE = input[i].GPE + denominator_potential * g * input[i].mass * input[j].mass;
+                input[i].GPE = input[i].GPE + (denominator_potential * g * input[i].mass * input[j].mass).neg();
             }
             input[i].acc = acceleration;
             
@@ -129,7 +129,7 @@ pub mod integrator {
             input[i].vel = input[i].vel.add(&input[i].acc.scalarmul(T::from(-0.5).unwrap()*dt));
 
         }
-        return (input,total_KE + total_GPE);
+        return (input, total_GPE,total_KE);
     }
 
 

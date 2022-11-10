@@ -75,7 +75,7 @@ fn main(){
     let planet = Ob::<f64,Vec3d<f64>>::new(EARTH_M,Vec3d{x:EARTH_R,y:0.,z:0.},Vec3d{x:0.,y:(((G*SUN_M / EARTH_R) as f64).sqrt()),z:0.},Vec3d{x:0.,y:0.,z:0.},kind::Planet,0.);
     let jupiter = Ob::<f64,Vec3d<f64>>::new(
         JUPITER_M,
-        Vec3d {x:-JUPITER_R, y:0.,z: 0.},
+        Vec3d {x:JUPITER_R, y:0.,z: 0.},
         Vec3d {x: 0., y: ((G * SUN_M) / JUPITER_R), z: 0. },
         Vec3d { x: 0., y: 0., z: 0. },
         kind::Planet,
@@ -113,16 +113,19 @@ fn main(){
     let mut data_string = String::with_capacity(10000000);
     
     let mut total_E = 0.;
+    let mut total_GPE = 0.;
+    let mut total_KE = 0.;
     
     let n_iter = 0;
     let mut nth_iter = 0;
-    (inputs,total_E) = step_back_v(inputs, dt, epsilon, &mut a_matrix, g); // Step back initial v by half a time step
+
+    (inputs,total_GPE,total_KE) = step_back_v(inputs, dt, epsilon, &mut a_matrix, g); // Step back initial v by half a time step
     // data_string += total_E.to_string().as_str(); data_string += ",";
     // data_string += format_inputs_to_string(&inputs).as_str();
     for _ in 0..((T/dt) as i64 ) {
         
-        (inputs, total_E) = euler_step2(inputs, dt, epsilon, &mut a_matrix, g);
-        
+        (inputs, total_GPE,total_KE) = euler_step2(inputs, dt, epsilon, &mut a_matrix, g);
+        total_E = total_GPE + total_KE;
         
         if nth_iter < n_iter {
             
@@ -131,6 +134,8 @@ fn main(){
         }
         else {
             data_string += total_E.to_string().as_str(); data_string += ",";
+            data_string += total_GPE.to_string().as_str(); data_string += ",";
+            data_string += total_KE.to_string().as_str(); data_string += ",";
             data_string += format_inputs_to_string(&inputs).as_str();
             nth_iter = 0;
         }
